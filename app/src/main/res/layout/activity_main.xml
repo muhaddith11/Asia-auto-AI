@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- TOP BAR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="SMART CAR CONTROL"
+                android:textColor="@color/accent_blue"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_bluetooth_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BT: Ulanmagan"
+                android:textColor="@color/red_error"
+                android:textSize="12sp"
+                android:layout_marginEnd="10dp" />
+
+            <ImageButton
+                android:id="@+id/btn_bluetooth"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/btn_circle"
+                android:src="@android:drawable/stat_sys_data_bluetooth"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- VOICE STATUS PANEL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/card_bg"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
+
+            <!-- Mic indicator -->
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp">
+
+                <View
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/btn_mic_bg" />
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_btn_speak_now" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ovoz o'chirilgan"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tv_wake_word"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="KUTMOQDA"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/card_bg"
+                        android:padding="4dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Uyg'otuvchi so'z:"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="\"Mashina\" | \"Машина\" | \"Auto\""
+                    android:textColor="@color/accent_blue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_command"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Masalan: \"Mashina, lyukni och\""
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tv_response"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/green_active"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- SWITCH + LANGUAGE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <Switch
+                android:id="@+id/switch_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ovoz: O'CHIQ"
+                android:textColor="@color/text_primary"
+                android:layout_marginEnd="16dp" />
+
+            <RadioGroup
+                android:id="@+id/rg_language"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_uz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="O'zbek"
+                    android:textColor="@color/text_primary"
+                    android:buttonTint="@color/accent_blue"
+                    android:checked="true"
+                    android:layout_marginEnd="8dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_ru"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Рус"
+                    android:textColor="@color/text_primary"
+                    android:buttonTint="@color/accent_blue"
+                    android:layout_marginEnd="8dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_en"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eng"
+                    android:textColor="@color/text_primary"
+                    android:buttonTint="@color/accent_blue" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- CONTROLS -->
+        <LinearLayout
+            android:id="@+id/layout_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView style="@style/SectionLabel" android:text="OYNALAR / ОКНА" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="6dp">
+                <Button android:id="@+id/btn_win_all_open" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="Hammasi +" />
+                <Button android:id="@+id/btn_win_all_close" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="Hammasi -" />
+                <Button android:id="@+id/btn_win_fl_open" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="Chap +" />
+                <Button android:id="@+id/btn_win_fl_close" style="@style/ControlBtnGray"
+                    android:layout_weight="1" android:text="Chap -" />
+                <Button android:id="@+id/btn_win_fr_open" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="O'ng +" />
+                <Button android:id="@+id/btn_win_fr_close" style="@style/ControlBtnGray"
+                    android:layout_weight="1" android:text="O'ng -" />
+            </LinearLayout>
+
+            <TextView style="@style/SectionLabel" android:text="LYUK / MUSIQA" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="6dp">
+                <Button android:id="@+id/btn_sunroof_open" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="Lyuk +" />
+                <Button android:id="@+id/btn_sunroof_close" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="Lyuk -" />
+                <Button android:id="@+id/btn_music_play" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="▶" />
+                <Button android:id="@+id/btn_music_pause" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="⏸" />
+                <Button android:id="@+id/btn_music_prev" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="⏮" />
+                <Button android:id="@+id/btn_music_next" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="⏭" />
+                <Button android:id="@+id/btn_vol_up" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="VOL+" />
+                <Button android:id="@+id/btn_vol_down" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="VOL-" />
+            </LinearLayout>
+
+            <TextView style="@style/SectionLabel" android:text="IQLIM / CHIROQ / BOSHQA" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="6dp">
+                <Button android:id="@+id/btn_ac_on" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="AC ON" />
+                <Button android:id="@+id/btn_ac_off" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="AC OFF" />
+                <Button android:id="@+id/btn_temp_up" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="Temp+" />
+                <Button android:id="@+id/btn_temp_down" style="@style/ControlBtnGray"
+                    android:layout_weight="1" android:text="Temp-" />
+                <Button android:id="@+id/btn_lights_on" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="Chiroq+" />
+                <Button android:id="@+id/btn_lights_off" style="@style/ControlBtnRed"
+                    android:layout_weight="1" android:text="Chiroq-" />
+                <Button android:id="@+id/btn_trunk_open" style="@style/ControlBtnBlue"
+                    android:layout_weight="1" android:text="Bagaj" />
+                <Button android:id="@+id/btn_horn" style="@style/ControlBtnGreen"
+                    android:layout_weight="1" android:text="Signal" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@android:drawable/ic_btn_speak_now"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tv_setup_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Smart Car Control"
+        android:textColor="@color/accent_blue"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tv_setup_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Oflayn ishlashi uchun bir marta til modelini yuklab oling.\nKeyin internet kerak bo'lmaydi."
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Download buttons -->
+    <LinearLayout
+        android:id="@+id/layout_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_download_ru"
+            style="@style/ControlBtnBlue"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
+            android:textSize="14sp"
+            android:text="Rus tili yuklab olish (45 MB)" />
+
+        <Button
+            android:id="@+id/btn_download_en"
+            style="@style/ControlBtnGray"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
+            android:textSize="14sp"
+            android:text="Ingliz tili yuklab olish (40 MB)" />
+
+        <Button
+            android:id="@+id/btn_download_uz"
+            style="@style/ControlBtnGray"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="24dp"
+            android:textSize="14sp"
+            android:text="O'zbek tili yuklab olish (20 MB)" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="* Yuklab olgandan keyin internet kerak emas"
+            android:textColor="@color/green_active"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btn_start"
+            style="@style/ControlBtnGreen"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:textSize="16sp"
+            android:text="Dasturni ishga tushirish →"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Progress -->
+    <LinearLayout
+        android:id="@+id/layout_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/accent_blue"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tv_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Yuklanmoqda..."
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:gravity="center" />
+    </LinearLayout>
+
+</LinearLayout>

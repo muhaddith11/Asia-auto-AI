@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CarVoiceControl" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_blue</item>
+        <item name="colorPrimaryVariant">@color/accent_blue_dark</item>
+        <item name="colorOnPrimary">@color/bg_dark</item>
+        <item name="colorSurface">@color/bg_card</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+    </style>
+
+    <style name="SectionLabel" parent="Widget.MaterialComponents.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.15</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <style name="ControlBtn" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="ControlBtnGreen" parent="ControlBtn">
+        <item name="backgroundTint">@color/btn_green</item>
+    </style>
+
+    <style name="ControlBtnRed" parent="ControlBtn">
+        <item name="backgroundTint">@color/btn_red</item>
+    </style>
+
+    <style name="ControlBtnBlue" parent="ControlBtn">
+        <item name="backgroundTint">@color/btn_blue</item>
+    </style>
+
+    <style name="ControlBtnGray" parent="ControlBtn">
+        <item name="backgroundTint">@color/btn_gray</item>
+    </style>
+</resources>
