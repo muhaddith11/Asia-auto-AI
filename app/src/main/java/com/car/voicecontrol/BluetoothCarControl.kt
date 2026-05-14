@@ -50,15 +50,17 @@ class BluetoothCarControl(private val context: Context) {
         }
     }
 
-    suspend fun sendCommand(code: String) = withContext(Dispatchers.IO) {
-        try {
-            if (code.isNotEmpty() && isConnected) {
-                outputStream?.write((code + "\n").toByteArray())
-                outputStream?.flush()
+    suspend fun sendCommand(code: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                if (code.isNotEmpty() && isConnected) {
+                    outputStream?.write((code + "\n").toByteArray())
+                    outputStream?.flush()
+                }
+            } catch (e: IOException) {
+                isConnected = false
+                onConnectionChanged?.invoke(false, "Connection lost")
             }
-        } catch (e: IOException) {
-            isConnected = false
-            onConnectionChanged?.invoke(false, "Connection lost")
         }
     }
 
