@@ -56,6 +56,8 @@ class BluetoothCarControl(private val context: Context) {
                 if (code.isNotEmpty() && isConnected) {
                     outputStream?.write((code + "\n").toByteArray())
                     outputStream?.flush()
+                } else {
+                    return@withContext
                 }
             } catch (e: IOException) {
                 isConnected = false
