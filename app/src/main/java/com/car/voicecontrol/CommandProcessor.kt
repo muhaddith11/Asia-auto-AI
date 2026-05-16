@@ -30,160 +30,161 @@ object CommandProcessor {
     private val commandMap = listOf(
         // WINDOWS - ALL
         Triple(
-            listOf("barcha oyna", "hamma oyna", "oynalar", "oynaları och"),
+            listOf("barcha oyna", "hamma oyna", "oynalar", "oynaları och", "barca oyna", "amma oyna"),
             listOf("все окна открыть", "все окна", "открыть все окна"),
             listOf("all windows open", "open all windows", "windows open all")
         ) to CarCommand.WINDOW_ALL_OPEN,
 
         Triple(
-            listOf("barcha oyna yop", "hamma oynani yop", "oynalarni yop"),
+            listOf("barcha oyna yop", "hamma oynani yop", "oynalarni yop", "barca oyna yop"),
             listOf("все окна закрыть", "закрыть все окна"),
             listOf("all windows close", "close all windows")
         ) to CarCommand.WINDOW_ALL_CLOSE,
 
         // WINDOW FRONT LEFT
         Triple(
-            listOf("old chap oyna", "haydovchi oyna", "chap oldingi oyna"),
+            listOf("old chap oyna", "haydovchi oyna", "chap oldingi oyna", "chap oyna"),
             listOf("водительское окно", "левое переднее окно открыть"),
             listOf("driver window open", "front left window open")
         ) to CarCommand.WINDOW_FRONT_LEFT_OPEN,
 
         Triple(
-            listOf("old chap oyna yop", "haydovchi oyna yop"),
+            listOf("old chap oyna yop", "haydovchi oyna yop", "chap oyna yop"),
             listOf("водительское окно закрыть", "левое переднее окно закрыть"),
             listOf("driver window close", "front left window close")
         ) to CarCommand.WINDOW_FRONT_LEFT_CLOSE,
 
         // WINDOW FRONT RIGHT
         Triple(
-            listOf("old ong oyna", "o'ng oldingi oyna", "yo'lovchi oyna"),
+            listOf("old ong oyna", "ong oldingi oyna", "yolovchi oyna", "ong oyna", "o'ng oyna", "yo'lovchi oyna"),
             listOf("пассажирское окно", "правое переднее окно открыть"),
             listOf("passenger window open", "front right window open")
         ) to CarCommand.WINDOW_FRONT_RIGHT_OPEN,
 
         Triple(
-            listOf("old ong oyna yop", "yo'lovchi oyna yop"),
+            listOf("old ong oyna yop", "yolovchi oyna yop", "ong oyna yop", "yo'lovchi oyna yop"),
             listOf("пассажирское окно закрыть", "правое переднее окно закрыть"),
             listOf("passenger window close", "front right window close")
         ) to CarCommand.WINDOW_FRONT_RIGHT_CLOSE,
 
         // SUNROOF
         Triple(
-            listOf("lyuk och", "lyukni och", "tomi och", "tomni och"),
+            listOf("lyuk och", "lyukni och", "tomi och", "tomni och", "luk och", "lukni och"),
             listOf("открой люк", "люк открыть", "открыть люк"),
             listOf("open sunroof", "sunroof open")
         ) to CarCommand.SUNROOF_OPEN,
 
         Triple(
-            listOf("lyuk yop", "lyukni yop", "tomi yop"),
+            listOf("lyuk yop", "lyukni yop", "tomi yop", "luk yop"),
             listOf("закрой люк", "люк закрыть", "закрыть люк"),
             listOf("close sunroof", "sunroof close")
         ) to CarCommand.SUNROOF_CLOSE,
 
         // MUSIC
         Triple(
-            listOf("musiqa quy", "musiqa boshla", "musiqa yoq", "qo'shiq yoq"),
+            listOf("musiqa quy", "musiqa boshla", "musiqa yoq", "qoshiq yoq", "qo'shiq yoq", "musiqa"),
             listOf("включи музыку", "музыку", "поставь музыку"),
             listOf("play music", "start music", "music on")
         ) to CarCommand.MUSIC_PLAY,
 
         Triple(
-            listOf("musiqa to'xtat", "musiqa o'chir", "pauza"),
+            listOf("musiqa toxtat", "musiqa ochir", "pauza", "musiqa to'xtat", "musiqa o'chir", "musiqani toxtat"),
             listOf("стоп музыка", "пауза", "выключи музыку"),
             listOf("pause music", "stop music", "music off")
         ) to CarCommand.MUSIC_PAUSE,
 
         Triple(
-            listOf("keyingi qo'shiq", "keyingisi", "navbatdagi"),
+            listOf("keyingi qoshiq", "keyingisi", "navbatdagi", "keyingi qo'shiq", "keyingi"),
             listOf("следующий", "следующая песня", "вперёд"),
             listOf("next song", "next track", "skip")
         ) to CarCommand.MUSIC_NEXT,
 
         Triple(
-            listOf("oldingi qo'shiq", "oldingisi", "orqaga"),
+            listOf("oldingi qoshiq", "oldingisi", "orqaga", "oldingi qo'shiq", "oldingi"),
             listOf("предыдущий", "предыдущая песня", "назад"),
             listOf("previous song", "previous track", "back")
         ) to CarCommand.MUSIC_PREV,
 
         // VOLUME
         Triple(
-            listOf("ovozni oshir", "balandroq", "ovoz oshir"),
+            listOf("ovozni oshir", "balandroq", "ovoz oshir", "baland"),
             listOf("громче", "увеличить громкость"),
             listOf("volume up", "louder")
         ) to CarCommand.VOLUME_UP,
 
         Triple(
-            listOf("ovozni past", "ovozni kamay", "sekinroq"),
+            listOf("ovozni past", "ovozni kamay", "sekinroq", "past qil", "ovoz past"),
             listOf("тише", "уменьшить громкость"),
             listOf("volume down", "quieter")
         ) to CarCommand.VOLUME_DOWN,
 
         Triple(
-            listOf("jim", "ovozni o'chir", "shovqinsiz"),
+            listOf("jim", "ovozni ochir", "shovqinsiz", "ovozni o'chir", "ovoz ochir"),
             listOf("тихо", "замолчи", "выключить звук"),
             listOf("mute", "silence")
         ) to CarCommand.VOLUME_MUTE,
 
         // AC / CLIMATE
         Triple(
-            listOf("konditsioner yoq", "konditsionerni yoq", "sovutgich yoq", "kond yoq"),
+            listOf("konditsioner yoq", "konditsionerni yoq", "sovutgich yoq", "kond yoq", "kondisioner yoq", "havo yoq"),
             listOf("включи кондиционер", "кондиционер включить", "кондиционер"),
             listOf("ac on", "air conditioner on", "turn on ac")
         ) to CarCommand.AC_ON,
 
         Triple(
-            listOf("konditsioner o'chir", "konditsionerni o'chir", "sovutgich o'chir"),
+            listOf("konditsioner ochir", "konditsionerni ochir", "sovutgich ochir", "kond ochir",
+                "konditsioner o'chir", "konditsionerni o'chir", "kondisioner ochir"),
             listOf("выключи кондиционер", "кондиционер выключить"),
             listOf("ac off", "air conditioner off", "turn off ac")
         ) to CarCommand.AC_OFF,
 
         Triple(
-            listOf("harorat oshir", "isitish oshir", "ilik qil"),
+            listOf("harorat oshir", "isitish oshir", "ilik qil", "issiq qil"),
             listOf("теплее", "повысить температуру"),
             listOf("temperature up", "warmer")
         ) to CarCommand.AC_TEMP_UP,
 
         Triple(
-            listOf("harorat past", "sovutroq qil", "salqin qil"),
+            listOf("harorat past", "sovutroq qil", "salqin qil", "sovuq qil"),
             listOf("холоднее", "понизить температуру"),
             listOf("temperature down", "cooler")
         ) to CarCommand.AC_TEMP_DOWN,
 
         // LIGHTS
         Triple(
-            listOf("chiroq yoq", "faralar yoq", "yorug'lik yoq"),
+            listOf("chiroq yoq", "faralar yoq", "yoruglik yoq", "yorug'lik yoq", "chiroqni yoq", "fara yoq"),
             listOf("включи фары", "фары включить", "свет включить"),
             listOf("lights on", "headlights on", "turn on lights")
         ) to CarCommand.LIGHTS_ON,
 
         Triple(
-            listOf("chiroq o'chir", "faralar o'chir"),
+            listOf("chiroq ochir", "faralar ochir", "chiroqni ochir", "chiroq o'chir", "faralar o'chir"),
             listOf("выключи фары", "фары выключить", "свет выключить"),
             listOf("lights off", "headlights off", "turn off lights")
         ) to CarCommand.LIGHTS_OFF,
 
         Triple(
-            listOf("uzun yorug", "uzun nur", "katta chiroq"),
+            listOf("uzun yorug", "uzun nur", "katta chiroq", "uzoq nur"),
             listOf("дальний свет", "дальний"),
             listOf("high beam", "full beam", "brights on")
         ) to CarCommand.LIGHTS_HIGH,
 
         // TRUNK
         Triple(
-            listOf("bagaj och", "kapotyni och", "orqa qopqoq"),
+            listOf("bagaj och", "kapotyni och", "orqa qopqoq", "bagajni och", "bagaj"),
             listOf("открой багажник", "багажник открыть"),
             listOf("open trunk", "trunk open")
         ) to CarCommand.TRUNK_OPEN,
 
         Triple(
-            listOf("bagaj yop", "kapotyni yop"),
+            listOf("bagaj yop", "kapotyni yop", "bagajni yop"),
             listOf("закрой багажник", "багажник закрыть"),
             listOf("close trunk", "trunk close")
         ) to CarCommand.TRUNK_CLOSE,
 
         // HORN
         Triple(
-            listOf("signal ber", "bib", "guguk"),
+            listOf("signal ber", "bib", "guguk", "signalini ber", "signal"),
             listOf("бибикни", "сигнал", "посигналь"),
             listOf("beep", "horn", "honk")
         ) to CarCommand.HORN_BEEP,
