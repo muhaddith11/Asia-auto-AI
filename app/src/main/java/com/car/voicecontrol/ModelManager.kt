@@ -12,11 +12,11 @@ object ModelManager {
 
     private const val MODEL_DIR = "vosk_model"
 
-    // Vosk kichik modellar (bir marta yuklashga mos)
+    // Vosk modellar - Uzbek katta model (aniqroq), Rus va Ingliz kichik
     private val MODEL_URLS = mapOf(
         "ru" to "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip",
         "en" to "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
-        "uz" to "https://alphacephei.com/vosk/models/vosk-model-small-uz-0.22.zip"
+        "uz" to "https://alphacephei.com/vosk/models/vosk-model-uz-0.22.zip"  // Katta model ~40MB
     )
 
     fun getModelPath(context: Context, lang: String): String {
