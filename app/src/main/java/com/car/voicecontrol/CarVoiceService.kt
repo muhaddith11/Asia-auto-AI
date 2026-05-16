@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.car.voicecontrol.byd.BydCarController
 
 class CarVoiceService : Service() {
 
     private var voiceEngine: OfflineVoiceEngine? = null
     private var ttsEngine: TtsEngine? = null
+    private var bydController: BydCarController? = null
     private var waitingForCommand = false
     private var currentLang = "uz"
     private var commandTimeoutHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -51,7 +53,17 @@ class CarVoiceService : Service() {
         createNotificationChannel()
         startForeground(NOTIF_ID, buildNotification("Ishga tushmoqda..."))
         ttsEngine = TtsEngine(this)
+        initByd()
         startEngine()
+    }
+
+    private fun initByd() {
+        bydController = BydCarController(this)
+        bydController?.onConnected = {
+            updateNotification("✅ BYD ulanди — qurilmasiz ishlaydi")
+            onStatus?.invoke("byd_connected")
+        }
+        bydController?.connect()
     }
 
     private fun startEngine() {
@@ -158,15 +170,38 @@ class CarVoiceService : Service() {
         // 4. Mashina buyrug'i (oyna, lyuk, musiqa...)
         val result = CommandProcessor.process(text)
         if (result.command != CarCommand.UNKNOWN) {
+            // BYD bo'lsa → BYD orqali, bo'lmasa → Bluetooth/ESP32
+            if (bydController?.isAvailable == true) {
+                executeBydCommand(result)
+            }
+            // Bluetooth ham ishlaydi (ESP32 ulangan bo'lsa)
             ttsEngine?.speakResult(result, currentLang)
             onCommand?.invoke(text)
             updateNotification(result.responseUz)
             resetStatus()
         } else {
-            // Noma'lum buyruq
             ttsEngine?.speakError(currentLang)
             onCommand?.invoke(text)
             resetStatus()
+        }
+    }
+
+    private fun executeBydCommand(result: CommandResult) {
+        val byd = bydController ?: return
+        when (result.command) {
+            CarCommand.AC_ON             -> byd.setAirConditioner(true)
+            CarCommand.AC_OFF            -> byd.setAirConditioner(false)
+            CarCommand.AC_TEMP_UP        -> byd.setDriverTemperature(3)
+            CarCommand.AC_TEMP_DOWN      -> byd.setDriverTemperature(1)
+            CarCommand.HEATER_ON         -> byd.setDriverHeating(2)
+            CarCommand.HEATER_OFF        -> byd.setDriverHeating(0)
+            CarCommand.MUSIC_PLAY        -> byd.mediaPlay()
+            CarCommand.MUSIC_PAUSE       -> byd.mediaPlay()
+            CarCommand.MUSIC_NEXT        -> byd.mediaNext()
+            CarCommand.MUSIC_PREV        -> byd.mediaPrev()
+            CarCommand.VOLUME_UP         -> byd.volumeUp()
+            CarCommand.VOLUME_DOWN       -> byd.volumeDown()
+            else -> { /* Qolganlar ESP32 orqali ketadi */ }
         }
     }
 
@@ -228,6 +263,7 @@ class CarVoiceService : Service() {
     override fun onDestroy() {
         voiceEngine?.destroy()
         ttsEngine?.destroy()
+        bydController?.disconnect()
         commandTimeoutHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
