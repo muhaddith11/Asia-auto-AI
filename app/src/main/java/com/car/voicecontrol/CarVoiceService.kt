@@ -23,9 +23,26 @@ class CarVoiceService : Service() {
             "привет машина", "hey car"
         )
 
+        // Til almashtirish buyruqlari
+        val LANG_SWITCH = mapOf(
+            "uz" to listOf(
+                "ozbekcha", "o'zbekcha", "uzbekcha", "uzbek", "uzbek tili",
+                "o'zbek tili", "o'zbek", "uzb"
+            ),
+            "ru" to listOf(
+                "ruscha", "po russki", "po-russki", "по русски", "по-русски",
+                "russkiy", "русский", "на русском", "russ"
+            ),
+            "en" to listOf(
+                "english", "inglizcha", "ingliz", "switch to english",
+                "in english", "angliycha"
+            )
+        )
+
         var onWakeWord: (() -> Unit)? = null
         var onCommand: ((String) -> Unit)? = null
         var onStatus: ((String) -> Unit)? = null
+        var onLangChanged: ((String) -> Unit)? = null
     }
 
     override fun onCreate() {
@@ -37,7 +54,7 @@ class CarVoiceService : Service() {
 
     private fun startEngine() {
         val lang = getSharedPreferences("car_prefs", Context.MODE_PRIVATE)
-            .getString("model_lang", "ru") ?: "ru"
+            .getString("model_lang", "uz") ?: "uz"
 
         if (!ModelManager.isModelReady(this, lang)) {
             updateNotification("Model yo'q — Setup ni oching")
@@ -45,10 +62,17 @@ class CarVoiceService : Service() {
             return
         }
 
+        voiceEngine?.destroy()
         voiceEngine = OfflineVoiceEngine(this)
 
         voiceEngine?.onReady = {
-            updateNotification("Doim eshitib turaman...")
+            val langName = when (lang) {
+                "uz" -> "O'zbek"
+                "ru" -> "Русский"
+                "en" -> "English"
+                else -> lang
+            }
+            updateNotification("✓ $langName — Doim eshitib turaman")
             onStatus?.invoke("ready")
             voiceEngine?.startListening()
         }
@@ -74,8 +98,13 @@ class CarVoiceService : Service() {
             val command = extractCommand(lower)
 
             if (command.isNotBlank()) {
-                // "Mashina, lyukni och" — bir gapda
-                executeCommand(command)
+                // Til almashtirish buyrug'i ham bo'lishi mumkin
+                val switchedLang = detectLangSwitch(command)
+                if (switchedLang != null) {
+                    switchLanguage(switchedLang)
+                } else {
+                    executeCommand(command)
+                }
             } else {
                 // Faqat "Mashina" — keyingi gapni kutish
                 waitingForCommand = true
@@ -92,8 +121,56 @@ class CarVoiceService : Service() {
         } else if (waitingForCommand) {
             waitingForCommand = false
             commandTimeoutHandler.removeCallbacksAndMessages(null)
-            executeCommand(lower)
+
+            val switchedLang = detectLangSwitch(lower)
+            if (switchedLang != null) {
+                switchLanguage(switchedLang)
+            } else {
+                executeCommand(lower)
+            }
         }
+    }
+
+    private fun detectLangSwitch(text: String): String? {
+        for ((lang, keywords) in LANG_SWITCH) {
+            if (keywords.any { text.contains(it) }) return lang
+        }
+        return null
+    }
+
+    private fun switchLanguage(newLang: String) {
+        // Yangi model yuklab olinganmi tekshir
+        if (!ModelManager.isModelReady(this, newLang)) {
+            val msg = when (newLang) {
+                "uz" -> "O'zbek modeli yo'q — Setup dan yuklab oling"
+                "ru" -> "Русская модель не установлена — откройте Setup"
+                "en" -> "English model not found — please open Setup"
+                else -> "Model not found"
+            }
+            updateNotification(msg)
+            onStatus?.invoke("model_missing_$newLang")
+            return
+        }
+
+        // Tilni saqlash
+        getSharedPreferences("car_prefs", Context.MODE_PRIVATE)
+            .edit().putString("model_lang", newLang).apply()
+
+        val langName = when (newLang) {
+            "uz" -> "O'zbek tiliga o'tmoqda..."
+            "ru" -> "Переключаюсь на русский..."
+            "en" -> "Switching to English..."
+            else -> "Switching..."
+        }
+
+        updateNotification(langName)
+        onStatus?.invoke("switching_$newLang")
+        onLangChanged?.invoke(newLang)
+
+        // Dvigatelni qayta ishga tushirish
+        commandTimeoutHandler.postDelayed({
+            startEngine()
+        }, 500)
     }
 
     private fun executeCommand(text: String) {

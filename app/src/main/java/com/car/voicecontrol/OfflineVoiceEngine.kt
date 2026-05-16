@@ -98,6 +98,8 @@ class OfflineVoiceEngine(private val context: Context) {
             "uz" -> listOf(
                 // Wake so'zlari
                 "mashina", "avto",
+                // Til almashtirish
+                "ozbekcha", "uzbekcha", "ruscha", "english", "inglizcha",
                 // Oyna
                 "barcha oyna och", "hamma oyna och", "oynalarni och",
                 "barcha oyna yop", "hamma oyna yop", "oynalarni yop",
@@ -137,6 +139,8 @@ class OfflineVoiceEngine(private val context: Context) {
             "ru" -> listOf(
                 // Wake so'zlari
                 "машина", "машину", "машине", "привет машина",
+                // Til almashtirish
+                "по русски", "по-русски", "русский", "английский", "узбекский",
                 // Oyna
                 "открой все окна", "закрой все окна",
                 "водительское окно открыть", "водительское окно закрыть",
@@ -172,6 +176,8 @@ class OfflineVoiceEngine(private val context: Context) {
             "en" -> listOf(
                 // Wake so'zlari
                 "hey car", "auto",
+                // Til almashtirish
+                "english", "russian", "uzbek", "switch to english", "switch to russian", "switch to uzbek",
                 // Oyna
                 "open all windows", "close all windows",
                 "driver window open", "driver window close",
