@@ -9,7 +9,9 @@ import androidx.core.app.NotificationCompat
 class CarVoiceService : Service() {
 
     private var voiceEngine: OfflineVoiceEngine? = null
+    private var ttsEngine: TtsEngine? = null
     private var waitingForCommand = false
+    private var currentLang = "uz"
     private var commandTimeoutHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
     companion object {
@@ -23,7 +25,6 @@ class CarVoiceService : Service() {
             "привет машина", "hey car"
         )
 
-        // Til almashtirish buyruqlari
         val LANG_SWITCH = mapOf(
             "uz" to listOf(
                 "ozbekcha", "o'zbekcha", "uzbekcha", "uzbek", "uzbek tili",
@@ -49,14 +50,15 @@ class CarVoiceService : Service() {
         super.onCreate()
         createNotificationChannel()
         startForeground(NOTIF_ID, buildNotification("Ishga tushmoqda..."))
+        ttsEngine = TtsEngine(this)
         startEngine()
     }
 
     private fun startEngine() {
-        val lang = getSharedPreferences("car_prefs", Context.MODE_PRIVATE)
+        currentLang = getSharedPreferences("car_prefs", Context.MODE_PRIVATE)
             .getString("model_lang", "uz") ?: "uz"
 
-        if (!ModelManager.isModelReady(this, lang)) {
+        if (!ModelManager.isModelReady(this, currentLang)) {
             updateNotification("Model yo'q — Setup ni oching")
             onStatus?.invoke("model_missing")
             return
@@ -65,14 +67,16 @@ class CarVoiceService : Service() {
         voiceEngine?.destroy()
         voiceEngine = OfflineVoiceEngine(this)
 
+        ttsEngine?.setLanguage(currentLang)
+
         voiceEngine?.onReady = {
-            val langName = when (lang) {
-                "uz" -> "O'zbek"
-                "ru" -> "Русский"
-                "en" -> "English"
-                else -> lang
+            val langName = when (currentLang) {
+                "uz" -> "🇺🇿 O'zbek"
+                "ru" -> "🇷🇺 Русский"
+                "en" -> "🇬🇧 English"
+                else -> currentLang
             }
-            updateNotification("✓ $langName — Doim eshitib turaman")
+            updateNotification("$langName — Doim eshitib turaman")
             onStatus?.invoke("ready")
             voiceEngine?.startListening()
         }
@@ -85,8 +89,8 @@ class CarVoiceService : Service() {
             updateNotification("Xato: $error")
         }
 
-        val modelPath = ModelManager.getModelPath(this, lang)
-        Thread { voiceEngine?.loadModel(modelPath, lang) }.start()
+        val modelPath = ModelManager.getModelPath(this, currentLang)
+        Thread { voiceEngine?.loadModel(modelPath, currentLang) }.start()
     }
 
     private fun processText(text: String) {
@@ -95,18 +99,12 @@ class CarVoiceService : Service() {
 
         if (hasWakeWord) {
             onWakeWord?.invoke()
+            ttsEngine?.speakWakeWord(currentLang)
             val command = extractCommand(lower)
 
             if (command.isNotBlank()) {
-                // Til almashtirish buyrug'i ham bo'lishi mumkin
-                val switchedLang = detectLangSwitch(command)
-                if (switchedLang != null) {
-                    switchLanguage(switchedLang)
-                } else {
-                    executeCommand(command)
-                }
+                handleCommand(command)
             } else {
-                // Faqat "Mashina" — keyingi gapni kutish
                 waitingForCommand = true
                 updateNotification("Buyruqni ayting...")
                 onStatus?.invoke("waiting")
@@ -121,14 +119,62 @@ class CarVoiceService : Service() {
         } else if (waitingForCommand) {
             waitingForCommand = false
             commandTimeoutHandler.removeCallbacksAndMessages(null)
-
-            val switchedLang = detectLangSwitch(lower)
-            if (switchedLang != null) {
-                switchLanguage(switchedLang)
-            } else {
-                executeCommand(lower)
-            }
+            handleCommand(lower)
         }
+    }
+
+    private fun handleCommand(text: String) {
+        // 1. Til almashtirish?
+        val switchedLang = detectLangSwitch(text)
+        if (switchedLang != null) {
+            switchLanguage(switchedLang)
+            return
+        }
+
+        // 2. Ilova ochish buyrug'i?
+        val appCmd = AppLauncher.detect(text)
+        if (appCmd != null) {
+            val launched = AppLauncher.launch(this, appCmd)
+            val response = AppLauncher.getResponseText(appCmd, currentLang)
+            ttsEngine?.speak(response)
+            onCommand?.invoke(text)
+            updateNotification(response)
+            resetStatus()
+            return
+        }
+
+        // 3. Sistema buyrug'i (WiFi, Mobile, Home)?
+        val sysCmd = SystemController.detect(text)
+        if (sysCmd != null) {
+            SystemController.execute(this, sysCmd)
+            val response = SystemController.getResponseText(sysCmd, currentLang)
+            ttsEngine?.speak(response)
+            onCommand?.invoke(text)
+            updateNotification(response)
+            resetStatus()
+            return
+        }
+
+        // 4. Mashina buyrug'i (oyna, lyuk, musiqa...)
+        val result = CommandProcessor.process(text)
+        if (result.command != CarCommand.UNKNOWN) {
+            ttsEngine?.speakResult(result, currentLang)
+            onCommand?.invoke(text)
+            updateNotification(result.responseUz)
+            resetStatus()
+        } else {
+            // Noma'lum buyruq
+            ttsEngine?.speakError(currentLang)
+            onCommand?.invoke(text)
+            resetStatus()
+        }
+    }
+
+    private fun resetStatus() {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            updateNotification("Doim eshitib turaman...")
+            onStatus?.invoke("ready")
+        }, 2000)
     }
 
     private fun detectLangSwitch(text: String): String? {
@@ -139,49 +185,27 @@ class CarVoiceService : Service() {
     }
 
     private fun switchLanguage(newLang: String) {
-        // Yangi model yuklab olinganmi tekshir
         if (!ModelManager.isModelReady(this, newLang)) {
+            ttsEngine?.speakModelMissing(newLang, currentLang)
             val msg = when (newLang) {
                 "uz" -> "O'zbek modeli yo'q — Setup dan yuklab oling"
-                "ru" -> "Русская модель не установлена — откройте Setup"
-                "en" -> "English model not found — please open Setup"
+                "ru" -> "Русская модель не установлена"
+                "en" -> "English model not found"
                 else -> "Model not found"
             }
             updateNotification(msg)
-            onStatus?.invoke("model_missing_$newLang")
             return
         }
 
-        // Tilni saqlash
         getSharedPreferences("car_prefs", Context.MODE_PRIVATE)
             .edit().putString("model_lang", newLang).apply()
 
-        val langName = when (newLang) {
-            "uz" -> "O'zbek tiliga o'tmoqda..."
-            "ru" -> "Переключаюсь на русский..."
-            "en" -> "Switching to English..."
-            else -> "Switching..."
-        }
-
-        updateNotification(langName)
-        onStatus?.invoke("switching_$newLang")
+        ttsEngine?.speakLangSwitch(newLang)
         onLangChanged?.invoke(newLang)
 
-        // Dvigatelni qayta ishga tushirish
         commandTimeoutHandler.postDelayed({
             startEngine()
-        }, 500)
-    }
-
-    private fun executeCommand(text: String) {
-        val result = CommandProcessor.process(text)
-        onCommand?.invoke(text)
-        updateNotification("Bajarildi: $text")
-
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            updateNotification("Doim eshitib turaman...")
-            onStatus?.invoke("ready")
-        }, 2000)
+        }, 1500)
     }
 
     private fun extractCommand(text: String): String {
@@ -203,6 +227,7 @@ class CarVoiceService : Service() {
 
     override fun onDestroy() {
         voiceEngine?.destroy()
+        ttsEngine?.destroy()
         commandTimeoutHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
