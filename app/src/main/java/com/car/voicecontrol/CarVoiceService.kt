@@ -5,13 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.car.voicecontrol.byd.BydCarController
+import com.car.voicecontrol.adapter.CarAdapterManager
 
 class CarVoiceService : Service() {
 
     private var voiceEngine: OfflineVoiceEngine? = null
     private var ttsEngine: TtsEngine? = null
-    private var bydController: BydCarController? = null
+    private var adapterManager: CarAdapterManager? = null
     private var waitingForCommand = false
     private var currentLang = "uz"
     private var commandTimeoutHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -53,17 +53,17 @@ class CarVoiceService : Service() {
         createNotificationChannel()
         startForeground(NOTIF_ID, buildNotification("Ishga tushmoqda..."))
         ttsEngine = TtsEngine(this)
-        initByd()
+        initAdapters()
         startEngine()
     }
 
-    private fun initByd() {
-        bydController = BydCarController(this)
-        bydController?.onConnected = {
-            updateNotification("✅ BYD ulanди — qurilmasiz ishlaydi")
-            onStatus?.invoke("byd_connected")
+    private fun initAdapters() {
+        adapterManager = CarAdapterManager(this)
+        adapterManager?.onAdapterDetected = { name ->
+            updateNotification("✅ $name ulandi")
+            onStatus?.invoke("adapter_connected")
         }
-        bydController?.connect()
+        adapterManager?.initialize()
     }
 
     private fun startEngine() {
@@ -170,11 +170,7 @@ class CarVoiceService : Service() {
         // 4. Mashina buyrug'i (oyna, lyuk, musiqa...)
         val result = CommandProcessor.process(text)
         if (result.command != CarCommand.UNKNOWN) {
-            // BYD bo'lsa → BYD orqali, bo'lmasa → Bluetooth/ESP32
-            if (bydController?.isAvailable == true) {
-                executeBydCommand(result)
-            }
-            // Bluetooth ham ishlaydi (ESP32 ulangan bo'lsa)
+            executeCarCommand(result)
             ttsEngine?.speakResult(result, currentLang)
             onCommand?.invoke(text)
             updateNotification(result.responseUz)
@@ -186,22 +182,44 @@ class CarVoiceService : Service() {
         }
     }
 
-    private fun executeBydCommand(result: CommandResult) {
-        val byd = bydController ?: return
+    private fun executeCarCommand(result: CommandResult) {
+        val mgr = adapterManager ?: return
+        val C = CarAdapterManager.CommandType
+
         when (result.command) {
-            CarCommand.AC_ON             -> byd.setAirConditioner(true)
-            CarCommand.AC_OFF            -> byd.setAirConditioner(false)
-            CarCommand.AC_TEMP_UP        -> byd.setDriverTemperature(3)
-            CarCommand.AC_TEMP_DOWN      -> byd.setDriverTemperature(1)
-            CarCommand.HEATER_ON         -> byd.setDriverHeating(2)
-            CarCommand.HEATER_OFF        -> byd.setDriverHeating(0)
-            CarCommand.MUSIC_PLAY        -> byd.mediaPlay()
-            CarCommand.MUSIC_PAUSE       -> byd.mediaPlay()
-            CarCommand.MUSIC_NEXT        -> byd.mediaNext()
-            CarCommand.MUSIC_PREV        -> byd.mediaPrev()
-            CarCommand.VOLUME_UP         -> byd.volumeUp()
-            CarCommand.VOLUME_DOWN       -> byd.volumeDown()
-            else -> { /* Qolganlar ESP32 orqali ketadi */ }
+            CarCommand.AC_ON          -> mgr.getAdapterFor(C.AC)?.setAC(true)
+            CarCommand.AC_OFF         -> mgr.getAdapterFor(C.AC)?.setAC(false)
+            CarCommand.AC_TEMP_UP     -> mgr.getAdapterFor(C.AC)?.setTemperature(3)
+            CarCommand.AC_TEMP_DOWN   -> mgr.getAdapterFor(C.AC)?.setTemperature(1)
+            CarCommand.HEATER_ON      -> mgr.getAdapterFor(C.HEATING)?.setHeating(true)
+            CarCommand.HEATER_OFF     -> mgr.getAdapterFor(C.HEATING)?.setHeating(false)
+            CarCommand.WINDOW_ALL_OPEN   -> mgr.getAdapterFor(C.WINDOW)?.setAllWindows(true)
+            CarCommand.WINDOW_ALL_CLOSE  -> mgr.getAdapterFor(C.WINDOW)?.setAllWindows(false)
+            CarCommand.WINDOW_FRONT_LEFT_OPEN  -> mgr.getAdapterFor(C.WINDOW)?.setWindow("FL", true)
+            CarCommand.WINDOW_FRONT_LEFT_CLOSE -> mgr.getAdapterFor(C.WINDOW)?.setWindow("FL", false)
+            CarCommand.WINDOW_FRONT_RIGHT_OPEN  -> mgr.getAdapterFor(C.WINDOW)?.setWindow("FR", true)
+            CarCommand.WINDOW_FRONT_RIGHT_CLOSE -> mgr.getAdapterFor(C.WINDOW)?.setWindow("FR", false)
+            CarCommand.WINDOW_BACK_LEFT_OPEN   -> mgr.getAdapterFor(C.WINDOW)?.setWindow("BL", true)
+            CarCommand.WINDOW_BACK_LEFT_CLOSE  -> mgr.getAdapterFor(C.WINDOW)?.setWindow("BL", false)
+            CarCommand.WINDOW_BACK_RIGHT_OPEN  -> mgr.getAdapterFor(C.WINDOW)?.setWindow("BR", true)
+            CarCommand.WINDOW_BACK_RIGHT_CLOSE -> mgr.getAdapterFor(C.WINDOW)?.setWindow("BR", false)
+            CarCommand.SUNROOF_OPEN   -> mgr.getAdapterFor(C.SUNROOF)?.setSunroof(true)
+            CarCommand.SUNROOF_CLOSE  -> mgr.getAdapterFor(C.SUNROOF)?.setSunroof(false)
+            CarCommand.LIGHTS_ON      -> mgr.getAdapterFor(C.LIGHTS)?.setLights(true)
+            CarCommand.LIGHTS_OFF     -> mgr.getAdapterFor(C.LIGHTS)?.setLights(false)
+            CarCommand.LIGHTS_HIGH    -> mgr.getAdapterFor(C.LIGHTS)?.setHighBeam(true)
+            CarCommand.LIGHTS_LOW     -> mgr.getAdapterFor(C.LIGHTS)?.setHighBeam(false)
+            CarCommand.TRUNK_OPEN     -> mgr.getAdapterFor(C.TRUNK)?.setTrunk(true)
+            CarCommand.TRUNK_CLOSE    -> mgr.getAdapterFor(C.TRUNK)?.setTrunk(false)
+            CarCommand.HORN_BEEP      -> mgr.getAdapterFor(C.HORN)?.beepHorn()
+            CarCommand.MUSIC_PLAY     -> mgr.getAdapterFor(C.MEDIA)?.mediaPlay()
+            CarCommand.MUSIC_PAUSE    -> mgr.getAdapterFor(C.MEDIA)?.mediaPause()
+            CarCommand.MUSIC_NEXT     -> mgr.getAdapterFor(C.MEDIA)?.mediaNext()
+            CarCommand.MUSIC_PREV     -> mgr.getAdapterFor(C.MEDIA)?.mediaPrev()
+            CarCommand.VOLUME_UP      -> mgr.getAdapterFor(C.VOLUME)?.volumeUp()
+            CarCommand.VOLUME_DOWN    -> mgr.getAdapterFor(C.VOLUME)?.volumeDown()
+            CarCommand.VOLUME_MUTE    -> mgr.getAdapterFor(C.VOLUME)?.volumeMute()
+            else -> {}
         }
     }
 
@@ -263,7 +281,7 @@ class CarVoiceService : Service() {
     override fun onDestroy() {
         voiceEngine?.destroy()
         ttsEngine?.destroy()
-        bydController?.disconnect()
+        adapterManager?.destroy()
         commandTimeoutHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
