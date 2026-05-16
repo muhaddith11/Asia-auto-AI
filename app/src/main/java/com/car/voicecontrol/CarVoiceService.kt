@@ -62,7 +62,7 @@ class CarVoiceService : Service() {
         }
 
         val modelPath = ModelManager.getModelPath(this, lang)
-        Thread { voiceEngine?.loadModel(modelPath) }.start()
+        Thread { voiceEngine?.loadModel(modelPath, lang) }.start()
     }
 
     private fun processText(text: String) {
